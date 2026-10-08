@@ -44,6 +44,10 @@ h2 { font-weight: 700 !important; font-size: 1.5rem !important; margin-top: 1.2r
 [data-testid="stSidebar"] { background: #17202B; }
 [data-testid="stSidebar"] * { color: #E8EDF2 !important; }
 [data-testid="stSidebarNav"] a[aria-current="page"] { background: rgba(232,237,242,0.10); border-radius: 6px; }
+[data-testid="stNavSectionHeader"] { color: #F2C14E !important; font-weight: 700; letter-spacing: 0.02em; margin-top: 0.6rem; }
+[data-testid="stNavSectionHeader"] * { color: #F2C14E !important; }
+.stMarkdown p.big-q, p.big-q { font-family: Archivo, sans-serif !important; font-weight: 800; font-size: 1.45rem !important; color: #17202B; margin: 0.2rem 0 0.4rem 0; }
+.step { display:flex; gap:14px; align-items:flex-start; margin:10px 0; } .step b.n { background:#17202B; color:#fff; border-radius:50%; min-width:30px; height:30px; display:flex; align-items:center; justify-content:center; font-size:0.9rem; }
 </style>
 """,
         unsafe_allow_html=True,
@@ -175,3 +179,27 @@ def check_allocation(df, vehicles, fleet, travel, allow):
                 late.append(f"{vid} {mins} of {budget} min")
     results.append(("Two trips at most, inside the time budgets", not late, "270 Fresh minutes, 480 Style and Tech minutes" if not late else ", ".join(late)))
     return results
+
+
+# ---------------- Validation (last 3 months of history, never seen in training)
+@st.cache_data
+def validation():
+    return pd.read_csv(DATA / "validation.csv")
+
+
+def flag_stats(v, threshold):
+    flagged = v["pred_late_prob"] >= threshold
+    late = v["late"] == 1
+    tp, fp, fn, tn = (flagged & late).sum(), (flagged & ~late).sum(), (~flagged & late).sum(), (~flagged & ~late).sum()
+    return dict(tp=int(tp), fp=int(fp), fn=int(fn), tn=int(tn),
+                recall=tp / max(1, tp + fn), precision=tp / max(1, tp + fp), flagged=int(flagged.sum()))
+
+
+def section_intro(title, lede):
+    st.title(title)
+    st.markdown(f'<p class="lede">{lede}</p>', unsafe_allow_html=True)
+
+
+def card(title, body, accent=TEAL):
+    st.markdown(f'<div class="tile" style="border-top:5px solid {accent}"><div style="font-weight:700;font-size:1.05rem;margin-bottom:6px">{title}</div>'
+                f'<div class="figure-note" style="font-size:0.98rem;color:#3A4550">{body}</div></div>', unsafe_allow_html=True)
