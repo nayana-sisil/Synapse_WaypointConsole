@@ -11,6 +11,9 @@ nav = {
         st.Page("views/b_weeks.py", title="The weeks ahead"),
         st.Page("views/b_peak.py", title="Peak day decisions"),
     ],
+    "Our approach": [
+        st.Page("views/a_journey.py", title="How we built it"),
+    ],
     "Technical view": [
         st.Page("views/t_performance.py", title="Model performance"),
         st.Page("views/t_explain.py", title="Why the model decides"),
